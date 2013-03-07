@@ -86,7 +86,7 @@
 	[rt begin];
 	[self renderStripes];
 	[self renderGradient];
-	//[self renderHighlight];
+	[self renderHighlight];
 	[self renderTopBorder];
 	[self renderNoise];
 	[rt end];
@@ -263,13 +263,37 @@
 - (void) renderTopBorder {
 	
 	float borderAlpha = 0.9f;
-	float borderWidth = 6.0f;
+	float borderWidth = 40.0f;
 	
-	ccVertex2F vertices[2];
+	ccVertex2F vertices[4];
+    ccVertex2F texCoord[4];
 	int nVertices = 0;
+    
+	CCSprite *s = [CCSprite spriteWithFile:@"cover_chocolate.png"];
+	[s setBlendFunc:(ccBlendFunc){GL_DST_COLOR, GL_ZERO}];
+    s.position = ccp(1, 1);
+	float imageSize = s.textureRect.size.height;
 	
-	/*vertices[nVertices++] = (ccVertex2F){0, borderWidth/2};
-	vertices[nVertices++] = (ccVertex2F){textureSize, borderWidth/2};
+	vertices[nVertices] = (ccVertex2F){0, 0};
+    texCoord[nVertices++] = (ccVertex2F){0,0};
+	vertices[nVertices] = (ccVertex2F){textureSize, 0};
+    texCoord[nVertices++] = (ccVertex2F){9,0};
+    vertices[nVertices] = (ccVertex2F){textureSize, imageSize};
+    texCoord[nVertices++] = (ccVertex2F){9,1};
+    vertices[nVertices] = (ccVertex2F){0, imageSize};
+    texCoord[nVertices++] = (ccVertex2F){0,1};
+
+    
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_TEXTURE_2D);
+    glEnable(GL_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+	
+
+
+	//glColor4f(1, 1, 1, 1);
+    
+    [s visit];
 	
 	// adjust vertices for retina
 	for (int i=0; i<nVertices; i++) {
@@ -277,24 +301,19 @@
 		vertices[i].y *= CC_CONTENT_SCALE_FACTOR();
 	}
 	
-	glDisableClientState(GL_COLOR_ARRAY);*/
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnable(GL_TEXTURE_2D);
-	
-	CCSprite *s = [CCSprite spriteWithFile:@"cover_chocolate.png"];
-	[s setBlendFunc:(ccBlendFunc){GL_DST_COLOR, GL_ZERO}];
-	s.position = ccp(0,0);
-	float imageSize = s.textureRect.size.width;
-	//s.scale = (float)textureSize/imageSize*CC_CONTENT_SCALE_FACTOR();
-	glColor4f(1, 1, 1, 1);
+	glDisableClientState(GL_COLOR_ARRAY);
+    
 
-    
-    
-	/*glLineWidth(borderWidth*CC_CONTENT_SCALE_FACTOR());
-	glColor4f(0, 0, 0, borderAlpha);*/
-	/*glVertexPointer(2, GL_FLOAT, 0, vertices);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)nVertices);*/
+    glBindTexture(GL_TEXTURE_2D, s.texture.name);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	/*glLineWidth(borderWidth*CC_CONTENT_SCALE_FACTOR());*/
+	//glColor4f(1, 1, 1, borderAlpha);
+	glVertexPointer(2, GL_FLOAT, 0, vertices);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoord);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDrawArrays(GL_QUADS, 0, (GLsizei)nVertices);
 }
 
 - (void) renderNoise {
