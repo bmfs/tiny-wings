@@ -37,7 +37,8 @@
 - (id) initWithWorld:(b2World*)w {
 	
 	if ((self = [super init])) {
-		
+    
+        
 		world = w;
 
 		CGSize size = [[CCDirector sharedDirector] winSize];
@@ -85,7 +86,7 @@
 	[rt begin];
 	[self renderStripes];
 	[self renderGradient];
-	[self renderHighlight];
+	//[self renderHighlight];
 	[self renderTopBorder];
 	[self renderNoise];
 	[rt end];
@@ -261,13 +262,13 @@
 
 - (void) renderTopBorder {
 	
-	float borderAlpha = 0.5f;
-	float borderWidth = 2.0f;
+	float borderAlpha = 0.9f;
+	float borderWidth = 6.0f;
 	
 	ccVertex2F vertices[2];
 	int nVertices = 0;
 	
-	vertices[nVertices++] = (ccVertex2F){0, borderWidth/2};
+	/*vertices[nVertices++] = (ccVertex2F){0, borderWidth/2};
 	vertices[nVertices++] = (ccVertex2F){textureSize, borderWidth/2};
 	
 	// adjust vertices for retina
@@ -276,13 +277,24 @@
 		vertices[i].y *= CC_CONTENT_SCALE_FACTOR();
 	}
 	
-	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);*/
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_TEXTURE_2D);
 	
-	glLineWidth(borderWidth*CC_CONTENT_SCALE_FACTOR());
-	glColor4f(0, 0, 0, borderAlpha);
-	glVertexPointer(2, GL_FLOAT, 0, vertices);
+	CCSprite *s = [CCSprite spriteWithFile:@"cover_chocolate.png"];
+	[s setBlendFunc:(ccBlendFunc){GL_DST_COLOR, GL_ZERO}];
+	s.position = ccp(0,0);
+	float imageSize = s.textureRect.size.width;
+	//s.scale = (float)textureSize/imageSize*CC_CONTENT_SCALE_FACTOR();
+	glColor4f(1, 1, 1, 1);
+
+    
+    
+	/*glLineWidth(borderWidth*CC_CONTENT_SCALE_FACTOR());
+	glColor4f(0, 0, 0, borderAlpha);*/
+	/*glVertexPointer(2, GL_FLOAT, 0, vertices);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)nVertices);
+	glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)nVertices);*/
 }
 
 - (void) renderNoise {
@@ -328,7 +340,7 @@
 		if(ny > maxHeight) ny = maxHeight;
 		if(ny < minHeight) ny = minHeight;
 		y = ny;
-		sign *= -1;
+		sign *= (arc4random() % 100>60)?1:-1;
 		hillKeyPoints[nHillKeyPoints++] = (ccVertex2F){x, y};
 	}
 
